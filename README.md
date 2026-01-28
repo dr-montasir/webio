@@ -18,7 +18,8 @@
 The goal of this project is to provide a fully functional async web framework with **zero external dependencies**. 
 - **No** `tokio` or `async-std`.
 - **No** `serde` (where possible).
-- **No** hyper.
+- **No** `hyper`.
+- **No** `bloat`.
 - **Just pure Rust.**
 
 ## 🛠️ Installation

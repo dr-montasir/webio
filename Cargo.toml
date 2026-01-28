@@ -15,6 +15,7 @@ exclude = [
     "examples/**",
     "tests/**",
     "Cargo.lock",
+    "dev.md",
     ".env"
 ]
 
