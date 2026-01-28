@@ -347,7 +347,7 @@ pub fn execute<F: Future>(mut future: F) -> F::Output {
     static VTABLE: RawWakerVTable = RawWakerVTable::new(
         |p| RawWaker::new(p, &VTABLE), // Clone
         |_| {},                                             // Wake
-        |_| {},                                             // Wake by ref      
+        |_| {},                                      // Wake by ref      
         |_| {});                                            // Drop
     
     // Create a raw waker from our VTable.

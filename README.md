@@ -18,7 +18,7 @@
 The goal of this project is to provide a fully functional async web framework with **zero external dependencies**. 
 - **No** `tokio` or `async-std`.
 - **No** `serde` (where possible).
-- **No** bloat.
+- **No** hyper.
 - **Just pure Rust.**
 
 ## 🛠️ Installation
@@ -26,4 +26,4 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-webio = "0.1.0-alpha"
+webio = "0.2.1-alpha"

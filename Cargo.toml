@@ -1,6 +1,6 @@
 [package]
 name = "webio"
-version = "0.2.0-alpha"
+version = "0.2.1-alpha"
 authors = ["Montasir Mirghani <montasir@fluxor.one>"]
 edition = "2024"
 description = "A minimalist async web framework for Rust with a zero-dependency philosophy."
@@ -10,6 +10,13 @@ repository = "https://github.com/dr-montasir/webio"
 readme = "README.md"
 keywords = ["std", "web", "async", "io"]
 categories = ["network-programming", "asynchronous", "web-programming::http-server"]
+exclude = [
+    "tests/**",
+    "src/examples/**",
+    ".github/**",
+    "Cargo.lock",
+    ".env"
+]
 
 [dependencies]
 
