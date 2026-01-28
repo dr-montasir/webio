@@ -26,4 +26,4 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-webio = "0.2.1-alpha"
+webio = "0.2.2-alpha"
