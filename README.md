@@ -20,6 +20,7 @@ The goal of this project is to provide a fully functional async web framework wi
 - **No** `serde` (where possible).
 - **No** `hyper`.
 - **No** `bloat`.
+- **No** `unsafe` code.
 - **Just pure Rust.**
 
 ## 🛠️ Installation
@@ -27,4 +28,4 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-webio = "0.2.2-alpha"
+webio = "0.3.0-alpha"
