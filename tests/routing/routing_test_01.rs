@@ -27,7 +27,7 @@ fn test_static_route_mapping() {
     // 1. Spawn the routing engine in a background thread
     // This allows the test to verify the server and then terminate.
     thread::spawn(|| {
-        execute(async {
+        launch(async {
             let mut app = WebIo::new();
 
             // Registering the hello handler

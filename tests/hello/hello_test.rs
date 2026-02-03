@@ -17,7 +17,7 @@ use std::thread;
 fn test_hello_world() {
     // 1. Spawn the WebIO server in a background thread
     thread::spawn(|| {
-        execute(async {
+        launch(async {
             let mut app = WebIo::new();
 
             app.route(GET, "/", |_req, _params| async {

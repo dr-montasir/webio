@@ -143,7 +143,7 @@ impl WebIo {
         let h: Handler = Box::new(move |r, p| Box::pin(handler(r, p)));
          // Sniffing the handler's default content type to categorize it
         let dummy_req = Req { method: "".into(), path: "".into(), body: "".into(), headers: HashMap::new() };
-        let sniff = execute(h(dummy_req, Params(HashMap::new())));
+        let sniff = launch(h(dummy_req, Params(HashMap::new())));
         
         let ct = sniff.headers.get("Content-Type").cloned().unwrap_or_default();
         if ct.contains("json") {
@@ -163,7 +163,10 @@ impl WebIo {
     }
 
     /// Starts the blocking TCP listener loop. 
-    /// Spawns a new thread per connection to maintain responsiveness.
+    /// 
+    /// Binds the server to the specified host and port. Each incoming connection 
+    /// is moved to a dedicated thread where the `launch` executor drives the 
+    /// asynchronous request handler.
     pub async fn run(self, host: &str, port: &str) {
         let listener = TcpListener::bind(format!("{}:{}", host, port)).expect("Bind failed");
         println!("🦀 WebIo Live: http://{}:{}", host, port);
@@ -171,13 +174,18 @@ impl WebIo {
         for stream in listener.incoming() {
             if let Ok(s) = stream {
                 let a = Arc::clone(&app);
-                // Multi-threaded execution model for high availability
-                std::thread::spawn(move || execute(a.handle_connection(s)));
+                // Multi-threaded execution model for high availability.
+                // Spawns a thread to launch the async handler for the connection.
+                std::thread::spawn(move || launch(a.handle_connection(s)));
             }
         }
     }
 
     /// Internal logic to parse HTTP raw text into structured [`Req`] data and route it.
+    /// 
+    /// # Protocol Handling
+    /// This function performs the split between HTTP metadata (headers) and the 
+    /// application payload (body). It ensures the [`Req`] struct is fully populated
     async fn handle_connection(&self, mut stream: TcpStream) {
         let start_time = Instant::now();
         let _ = stream.set_nodelay(true); // Optimizes for small packets/latency
@@ -185,8 +193,19 @@ impl WebIo {
 
         let mut buffer = [0; 4096];
         let n = match stream.read(&mut buffer) { Ok(n) if n > 0 => n, _ => return };
+        
+        // Use the raw buffer to find the split between headers and body
         let header_str = String::from_utf8_lossy(&buffer[..n]);
         
+        // --- BODY EXTRACTION ---
+        // HTTP/1.1 defines the body as following the double CRLF sequence.
+        // We capture this slice to populate Req::body.
+        let body = if let Some(pos) = header_str.find("\r\n\r\n") {
+            header_str[pos + 4..].to_string()
+        } else {
+            String::new()
+        };
+
         let mut lines = header_str.lines();
         let parts: Vec<&str> = lines.next().unwrap_or("").split_whitespace().collect();
         if parts.len() < 2 || parts[1] == "/favicon.ico" { return; }
@@ -195,16 +214,11 @@ impl WebIo {
 
         let mut headers = HashMap::new();
         for line in lines {
-            if line.is_empty() { break; }
+            if line.is_empty() { break; } // Reached the end of headers
             if let Some((k, v)) = line.split_once(": ") {
                 headers.insert(k.to_lowercase(), v.to_string());
             }
         }
-
-        // Execution Logic:
-        // 1. Check Middleware for early returns.
-        // 2. Parse Route segments and extract parameters.
-        // 3. Fallback to Smart 404 if no route matches.
 
         // --- 1. Middleware ---
         if let Some(ref mw_func) = self.mw {
@@ -235,12 +249,18 @@ impl WebIo {
             }
         }
 
-        let req = Req { method: method.to_string(), path: full_path.to_string(), body: String::new(), headers };
+        // REQ INSTANTIATION UPDATED: Now uses the extracted body
+        let req = Req { 
+            method: method.to_string(), 
+            path: full_path.to_string(), 
+            body, 
+            headers 
+        };
         
         let reply = if let Some(handler) = active_handler {
             handler(req, Params(final_params)).await
         } else {
-            // --- 3. SMART 404: Default JSON, HTML for Browsers ---
+            // --- 3. SMART 404 ---
             let accept = req.headers.get("accept").cloned().unwrap_or_default();
             let h_404 = if accept.contains("text/html") {
                 self.handlers_404.get("html") 
@@ -326,10 +346,14 @@ impl WebIo {
     }
 }
 
-/// A high-performance, zero-dependency blocking executor that drives a [`Future`] to completion.
+/// Launches the WebIo async runtime to drive a [`Future`] to completion.
+///
+/// As a high-performance, zero-dependency blocking executor, `launch` serves as the 
+/// framework's primary entry point. It bridges the synchronous `main` thread (or spawned 
+/// OS threads) into the asynchronous world of WebIo.
 /// 
-/// In local environments, WebIo consistently achieves response times in the 
-/// **70µs - 400µs** range (e.g., 29.01.2026 `[10:48:50] GET / -> 200 (70.8µs)`) 
+/// In local environments, `launch` consistently achieves response times in the 
+/// **70µs - 400µs** range (e.g., `[10:48:50] GET / -> 200 (70.8µs)`) 
 /// without using any `unsafe` code.
 ///
 /// ### Performance Breakdown:
@@ -341,34 +365,40 @@ impl WebIo {
 /// *Note: Occasional 100ms+ spikes observed in logs are attributed to OS-level 
 /// TCP Delayed ACKs and kernel thread scheduling on loopback interfaces.*
 /// 
+/// ### Evolution: From `execute` to `launch`
+/// Transitioning from the legacy `execute` naming to `launch` reflects the framework's 
+/// design as a complete application engine. While it internally drives the future, 
+/// it also initializes the execution context required for **WebIo's** ultra-low-latency 
+/// performance.
+/// 
 /// ### Evolution: From Unsafe to Safe-Turbo
 /// Originally, this executor utilized `unsafe` blocks for stack pinning and manual 
 /// `RawWakerVTable` construction to achieve maximum speed. The current implementation 
 /// replaces these with safe, zero-cost abstractions from the Rust Standard Library 
 /// (`std::pin::pin!` and `Waker::noop()`).
 ///
-/// This transition ensures:
-/// 1. **Mathematical Safety**: Eliminates the risk of Undefined Behavior (UB) and Segfaults.
-/// 2. **Modern Abstractions**: Uses `Waker::noop()` (stabilized in Rust 1.77), which provides
-///    the most efficient possible "do-nothing" waker for the target CPU architecture.
-/// 3. **Pinned Stability**: Employs `std::pin::pin!` to satisfy the pinning contract 
-///    entirely within the safe-type system.
+/// ### Safety & Modern Abstractions
+/// The current implementation utilizes zero-cost abstractions from the Rust 
+/// Standard Library:
+/// 1. **Mathematical Safety**: Eliminates Undefined Behavior (UB) via 100% safe code.
+/// 2. **Modern Wakers**: Uses [Waker::noop()](https://doc.rust-lang.org) 
+///    (Rust 1.77+), providing the most efficient possible "do-nothing" waker.
+/// 3. **Pinned Stability**: Employs [std::pin::pin!](https://doc.rust-lang.org) 
+///    to satisfy the pinning contract entirely within the safe-type system.
 ///
-/// ### Performance & Big Data Architecture:
-/// To maintain **sub-100µs** response times and high throughput for large data transfers, 
-/// the executor employs a **Hybrid Spin-Wait Strategy**:
-/// - **Spin-Phase (150,000 cycles)**: The executor stays "on-core" using `std::hint::spin_loop()`.
-///   This bypasses the OS scheduler's latency (which can be 1ms+) by catching I/O ready 
-///   states in nanoseconds. This is critical for Big Data chunks flowing through `BufWriter`.
-/// - **Yield-Phase**: If the future remains `Pending` after the spin budget, it calls 
-///   `std::thread::yield_now()` to relinquish the time slice, preventing 100% CPU starvation
-///   during genuine stalls.
+/// ### Hybrid Spin-Wait Strategy:
+/// To maintain **sub-100µs** response times for Big Data transfers, `launch` employs:
+/// - **Spin-Phase (150,000 cycles)**: Stays "on-core" using [std::hint::spin_loop()](https://doc.rust-lang.org).
+///   Bypasses OS scheduler latency by catching I/O ready states in nanoseconds.
+/// - **Yield-Phase**: If the future remains `Pending` after the budget, it calls 
+///   [std::thread::yield_now()](https://doc.rust-lang.org) 
+///   to prevent 100% CPU starvation during genuine stalls.
 ///
 /// ### Zero-Dependency Philosophy:
 /// By strictly using `std`, **WebIO** avoids the heavy binary footprint and 
 /// complex task-stealing overhead of runtimes like `Tokio`, making it ideal for 
 /// ultra-low-latency microservices.
-pub fn execute<F: Future>(future: F) -> F::Output {
+pub fn launch<F: Future>(future: F) -> F::Output {
     let mut future = pin!(future);
     let waker = Waker::noop(); // Waker::noop() is a zero-cost abstraction in Rust 1.77+
     let mut cx = Context::from_waker(waker);

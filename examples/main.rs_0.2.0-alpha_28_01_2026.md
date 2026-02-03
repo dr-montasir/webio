@@ -66,8 +66,8 @@ async fn secret_handler(_req: Req, _params: Params) -> Reply {
 }
 
 fn main() {
-    // The entry point uses our custom executor to block on the async app loop.
-    execute(async {
+    // Ignition: Launches the Safe-Turbo executor to drive the async application loop.
+    launch(async {
         let mut app = WebIo::new();
 
         // 1. Smart 404 Registration: Register 404 Handlers (HTML & JSON)
