@@ -22,6 +22,8 @@ use std::{
     thread
 };
 
+use std::path::{Path, PathBuf};
+
 // --- Core Traits & Types ---
 
 /// Enables streaming response bodies to support large data transfers without 
@@ -117,6 +119,7 @@ pub struct WebIo {
     routes: Vec<(String, String, Handler)>,
     mw: Option<Middleware>,
     handlers_404: HashMap<String, Handler>,
+    static_dir: String,
 }
 
 impl WebIo {
@@ -125,8 +128,58 @@ impl WebIo {
         Self { 
             routes: Vec::new(), 
             mw: None, 
-            handlers_404: HashMap::new() 
+            handlers_404: HashMap::new() ,
+            static_dir: "assets".to_string(), // Default name ==> "assets"
         } 
+    }
+
+    /// Configures the root directory for serving static assets (CSS, JS, Images, etc.).
+    /// Example: app.use_static("src/assets");
+    pub fn use_static(&mut self, path: &str) {
+        self.static_dir = path.to_string();
+    }
+
+    /// Internal helper to serve static files from the configured directory.
+    async fn serve_static(&self, path: &str) -> Option<Reply> {
+        let relative_path = path.trim_start_matches('/');
+        let base_path = PathBuf::from(&self.static_dir);
+        let target_path = base_path.join(relative_path);
+
+        // 1. Direct Match (e.g., /css/style.css)
+        if target_path.exists() && target_path.is_file() {
+            return self.create_file_reply(&target_path);
+        }
+
+        // 2. Dynamic Discovery for favicon.ico
+        // If the browser asks for /favicon.ico but it's not at the root, search all folders.
+        if relative_path == "favicon.ico" {
+            if let Some(found_path) = find_file_recursive(&base_path, "favicon.ico") {
+                return self.create_file_reply(&found_path);
+            }
+        }
+
+        None
+    }
+
+    /// Helper to read file and attach the correct MIME type
+    fn create_file_reply(&self, path: &Path) -> Option<Reply> {
+        use std::fs;
+        if let Ok(content) = fs::read(path) {
+            let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("");
+            let ct = match ext {
+                "ico"  => "image/x-icon",
+                "css"  => "text/css",
+                "js"   => "application/javascript",
+                "svg"  => "image/svg+xml",
+                "png"  => "image/png",
+                "jpg" | "jpeg" => "image/jpeg", // <--- Add this line!
+                "gif"  => "image/gif",
+                "mp4"  => "video/mp4",
+                _      => "application/octet-stream",
+            };
+            return Some(Reply::new(StatusCode::Ok).header("Content-Type", ct).body(content));
+        }
+        None
     }
 
     /// Registers a global middleware function. 
@@ -197,7 +250,7 @@ impl WebIo {
         // Use the raw buffer to find the split between headers and body
         let header_str = String::from_utf8_lossy(&buffer[..n]);
         
-        // --- BODY EXTRACTION ---
+        // --- 1. BODY EXTRACTION ---
         // HTTP/1.1 defines the body as following the double CRLF sequence.
         // We capture this slice to populate Req::body.
         let body = if let Some(pos) = header_str.find("\r\n\r\n") {
@@ -208,7 +261,9 @@ impl WebIo {
 
         let mut lines = header_str.lines();
         let parts: Vec<&str> = lines.next().unwrap_or("").split_whitespace().collect();
-        if parts.len() < 2 || parts[1] == "/favicon.ico" { return; }
+        
+        // favicon.ico
+        if parts.len() < 2 { return; } 
 
         let (method, full_path) = (parts[0], parts[1]);
 
@@ -220,7 +275,7 @@ impl WebIo {
             }
         }
 
-        // --- 1. Middleware ---
+        // --- 2. MIDDLEWARE ---
         if let Some(ref mw_func) = self.mw {
             if let Some(early_reply) = mw_func(full_path) {
                 self.finalize(stream, early_reply, method, full_path, start_time).await;
@@ -228,7 +283,7 @@ impl WebIo {
             }
         }
 
-        // --- 2. Router ---
+        // --- 3. ROUTER ---
         let path_only = full_path.split('?').next().unwrap_or("/");
         let mut final_params = HashMap::new();
         let mut active_handler: Option<&Handler> = None;
@@ -249,7 +304,7 @@ impl WebIo {
             }
         }
 
-        // REQ INSTANTIATION UPDATED: Now uses the extracted body
+        // Instantiate Request object
         let req = Req { 
             method: method.to_string(), 
             path: full_path.to_string(), 
@@ -257,10 +312,15 @@ impl WebIo {
             headers 
         };
         
+        // --- 4. EXECUTION PRIORITY ---
         let reply = if let Some(handler) = active_handler {
+            // Priority 1: Defined Route
             handler(req, Params(final_params)).await
+        } else if let Some(static_reply) = self.serve_static(path_only).await {
+            // Priority 2: Automated Static File (css, js, images, etc.)
+            static_reply
         } else {
-            // --- 3. SMART 404 ---
+            // Priority 3: Smart 404 (Content-Type Aware)
             let accept = req.headers.get("accept").cloned().unwrap_or_default();
             let h_404 = if accept.contains("text/html") {
                 self.handlers_404.get("html") 
@@ -275,6 +335,7 @@ impl WebIo {
             }
         };
 
+        // --- 5. FINALIZE ---
         self.finalize(stream, reply, method, full_path, start_time).await;
     }
 
@@ -420,4 +481,26 @@ pub fn launch<F: Future>(future: F) -> F::Output {
             }
         }
     }
+}
+
+/// Dynamic recursive search: checks base_path and all subfolders for filename.
+fn find_file_recursive(dir: &std::path::Path, filename: &str) -> Option<std::path::PathBuf> {
+    if !dir.is_dir() { return None; }
+    
+    // Check current directory first
+    let current_check = dir.join(filename);
+    if current_check.exists() { return Some(current_check); }
+
+    // Scan subdirectories
+    if let Ok(entries) = std::fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                if let Some(found) = find_file_recursive(&path, filename) {
+                    return Some(found);
+                }
+            }
+        }
+    }
+    None
 }
