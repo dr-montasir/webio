@@ -120,6 +120,7 @@ pub struct WebIo {
     mw: Option<Middleware>,
     handlers_404: HashMap<String, Handler>,
     static_dir: String,
+    pub log_request_enabled: bool,
 }
 
 impl WebIo {
@@ -130,7 +131,38 @@ impl WebIo {
             mw: None, 
             handlers_404: HashMap::new() ,
             static_dir: "assets".to_string(), // Default name ==> "assets"
+            log_request_enabled: false, // default value
         } 
+    }
+
+    /// Logs the details of an HTTP request and response, including method, path, status code, and processing time.
+    /// 
+    /// # Parameters
+    /// - `method`: The HTTP method used for the request (e.g., "GET", "POST").
+    /// - `path`: The URL path requested by the client (e.g., "/api/data").
+    /// - `status`: The HTTP status code of the response (e.g., 200, 404).
+    /// - `start`: The `Instant` timestamp when the request processing started.
+    /// - `should_log`: A boolean flag indicating whether to perform logging. If `false`, the function returns immediately without logging.
+    ///
+    /// # Behavior
+    /// - If `should_log` is `false`, no log is produced.
+    /// - If `true`, logs a timestamped message with request details and the elapsed time since `start`.
+    /// - The timestamp is formatted as HH:MM:SS based on the current system time at the moment of logging.
+    /// - The log includes high-resolution timing (`start.elapsed()`) to measure the processing duration precisely.
+    fn log_request(&self, method: &str, path: &str, status: u16, start: Instant, should_log: bool) {
+        if !should_log {
+            return;
+        }
+        
+        // --- High-Resolution Performance Logging ---
+        // We calculate the precise duration from the moment the TCP stream was accepted
+        // until the final byte of the chunked response is flushed.
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
+        println!(
+            "[{:02}:{:02}:{:02}] {} {} -> {} ({:?})", 
+            (now/3600)%24, (now/60)%60, now%60, 
+            method, path, status, start.elapsed() // Direct high-resolution measurement
+        );
     }
 
     /// Configures the root directory for serving static assets (CSS, JS, Images, etc.).
@@ -172,7 +204,7 @@ impl WebIo {
                 "js"   => "application/javascript",
                 "svg"  => "image/svg+xml",
                 "png"  => "image/png",
-                "jpg" | "jpeg" => "image/jpeg", // <--- Add this line!
+                "jpg" | "jpeg" => "image/jpeg",
                 "gif"  => "image/gif",
                 "mp4"  => "video/mp4",
                 _      => "application/octet-stream",
@@ -222,7 +254,7 @@ impl WebIo {
     /// asynchronous request handler.
     pub async fn run(self, host: &str, port: &str) {
         let listener = TcpListener::bind(format!("{}:{}", host, port)).expect("Bind failed");
-        println!("🦅 WebIo Live: http://{}:{}", host, port);
+        println!("🦅 WebIO Live: http://{}:{}", host, port);
         let app = Arc::new(self);
         for stream in listener.incoming() {
             if let Ok(s) = stream {
@@ -394,12 +426,8 @@ impl WebIo {
         // --- High-Resolution Performance Logging ---
         // We calculate the precise duration from the moment the TCP stream was accepted
         // until the final byte of the chunked response is flushed.
-        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
-        println!(
-            "[{:02}:{:02}:{:02}] {} {} -> {} ({:?})", 
-            (now/3600)%24, (now/60)%60, now%60, 
-            method, path, reply.status, start.elapsed() // Direct high-resolution measurement
-        );
+        // Call the logging function
+        self.log_request(method, path, reply.status, start, self.log_request_enabled);
 
         // Terminate the connection immediately to free up OS resources and 
         // prevent 'hanging' connections in high-concurrency benchmarks.
