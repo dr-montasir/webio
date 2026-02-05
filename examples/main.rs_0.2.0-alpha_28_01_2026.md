@@ -111,7 +111,7 @@ fn main() {
 // In local environments, WebIo consistently achieves response times in the 
 // **50µs - 150µs** range (e.g., `[00:50:18] GET / -> 200 (56.9µs)`).
 
-// 🦀 WebIo Live: http://127.0.0.1:8080
+// 🦅 WebIo Live: http://127.0.0.1:8080
 // [00:50:09] GET / -> 200 (802.1µs)
 // [00:50:14] GET / -> 200 (988.6µs)
 // [00:50:16] GET / -> 200 (153.9µs)
@@ -142,7 +142,7 @@ fn main() {
 // [00:51:20] GET / -> 200 (600.6µs)
 
 
-// 🦀 WebIo Live: http://127.0.0.1:8080
+// 🦅 WebIo Live: http://127.0.0.1:8080
 // [03:49:31] GET / -> 200 (781.9µs)
 // [03:49:32] GET / -> 200 (336.8µs)
 // [03:49:33] GET / -> 200 (112.2µs)

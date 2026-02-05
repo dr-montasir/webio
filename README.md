@@ -1,4 +1,4 @@
-# WebIO 🦀
+# WebIO 🦅
 
 > **A minimalist async web framework for Rust with a zero-dependency philosophy.**
 
@@ -28,4 +28,4 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-webio = "0.4.1-alpha"
+webio = "0.4.2-alpha"

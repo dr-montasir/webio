@@ -1,4 +1,4 @@
-//! # WebIO 🦀
+//! # WebIO 🦅
 //! 
 //! A minimalist, high-performance async web framework for Rust built with a **zero-dependency philosophy**.
 //! 
@@ -222,7 +222,7 @@ impl WebIo {
     /// asynchronous request handler.
     pub async fn run(self, host: &str, port: &str) {
         let listener = TcpListener::bind(format!("{}:{}", host, port)).expect("Bind failed");
-        println!("🦀 WebIo Live: http://{}:{}", host, port);
+        println!("🦅 WebIo Live: http://{}:{}", host, port);
         let app = Arc::new(self);
         for stream in listener.incoming() {
             if let Ok(s) = stream {
