@@ -21,7 +21,7 @@ fn test_async_state_capture() {
     // 1. Spawn the server in a background thread
     // We use 'move' on the closure AND the async block to transfer ownership of 'message'
     thread::spawn(move || {
-        launch(async move {
+        block_on(async move {
             let mut app = WebIo::new();
             
             // This proves the message was successfully moved into the async engine
@@ -34,7 +34,7 @@ fn test_async_state_capture() {
             });
 
             // Bind to 8082 to maintain parallel test execution
-            app.run("127.0.0.1", "8082").await;
+            app.run("127.0.0.1", "8082");
         });
     });
 

@@ -107,7 +107,7 @@ fn main() {
 
         // 2. static
         // app.use_static("src/assets"); 
-        let static_dir = "src/assets"; 
+        let static_dir = "assets"; 
         app.use_static(static_dir); 
         
         // 3. Smart 404 Registration: Register 404 Handlers (HTML & JSON)

@@ -27,14 +27,14 @@ fn test_static_route_mapping() {
     // 1. Spawn the routing engine in a background thread
     // This allows the test to verify the server and then terminate.
     thread::spawn(|| {
-        launch(async {
+        block_on(async {
             let mut app = WebIo::new();
 
             // Registering the hello handler
             app.route(GET, "/", hello);
 
             // Bind to 8081 to avoid port conflicts with other tests
-            app.run("127.0.0.1", "8081").await;
+            app.run("127.0.0.1", "8081");
         });
     });
 

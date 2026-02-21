@@ -1,74 +1,7 @@
-# WebIO 🦅
-
-> **A minimalist, high-performance web framework for Rust built with a zero-dependency philosophy.**
-
-<div style="text-align: center;">
-  <a href="https://github.com/dr-montasir/webio"><img src="https://img.shields.io/badge/github-dr%20montasir%20/%20webio-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="24" style="margin-top: 10px;" alt="github" /></a> <a href="https://crates.io/crates/webio"><img src="https://img.shields.io/crates/v/webio.svg?style=for-the-badge&color=fc8d62&logo=rust" height="24" style="margin-top: 10px;" alt="crates.io"></a> <a href="https://docs.rs/webio"><img src="https://img.shields.io/badge/docs.rs-webio-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="24" style="margin-top: 10px;" alt="docs.rs"></a> <a href="https://choosealicense.com/licenses/mit"><img src="https://img.shields.io/badge/license-mit-4a98f7.svg?style=for-the-badge&labelColor=555555" height="24" style="margin-top: 10px;" alt="license"></a>
-</div>
-
----
-
-## 🧪 Research Status: Experimental
-**WebIO** is currently in an active **research and development phase**. 
-- **API Stability:** Expect breaking changes as we refine the core engine.
-- **Goal:** To provide a high-integrity core engine for **Data Science**, **Computing Science**, and frameworks like **Fluxor**.
-- **Production Warning:** Use with caution until the stable `1.0.0` released.
-
-## 🎯 Core Philosophy
-WebIO provides a fully functional web engine with **zero external dependencies**. By strictly utilizing the Rust std library, it ensures an ultra-light footprint, rapid compilation, and total memory predictability.
-**zero external dependencies**. 
-- **No** `tokio`, `async-std` or `hyper`.
-- **No** `serde` or heavy middleware bloat.
-- **No** `unsafe`  code in the executor.
-- **Just pure, high-performance Rust**.
-
-## 🛠️ Installation
-Add this to your `Cargo.toml`:
-
-```toml
-[dependencies]
-webio = "0.5.0-alpha"
-```
-
-## 🚀 What's New in v0.5.0-alpha
-The `v0.5.0-alpha` release represents a major architectural shift from a single-threaded async model to a **High-Performance Multi-threaded Hybrid Engine** inspired by the Go concurrency model.
-
-## 🧵 Go-Inspired Multi-threading
-WebIO now mimics the Go strategy by spawning a unique **OS Thread** for every incoming connection. This ensures **Pre-emptive Multitasking**: a heavy mathematical calculation on one thread will never "freeze" the server for other users—a common pitfall in traditional async runtimes like Tokio.
-
-## ⚡ Safe-Turbo block_on Executor
-We have replaced the legacy runtime with a specialized **Safe-Turbo Bridge**. It utilizes a **150,000-cycle spin-loop** to catch I/O ready states in nanoseconds. This bypasses OS scheduler jitter, maintaining sub-millisecond tail latency (~200µs) while remaining 100% safe.
-
-## 🛡️ RAM Safety & Big Data Streaming
-- **10MB Safety Valve**: A pre-emptive RAM guard protects the heap by rejecting massive payloads before they are ingested.
-- **Zero-RAM Ingestion**: Handlers now have direct access to the `TcpStream`, allowing multi-gigabyte files (CSVs, Videos, Datasets) to be moved directly to disk in 64KB chunks with O(1) **memory complexity**.
-
-## 🛰️ Real-Time WebSockets & Global Broadcast
-Full **RFC 6455** compliance is now built-in. WebIO handles the cryptographic handshake (SHA-1/Base64) and binary framing manually. The new **Global Client Registry** allows any thread to broadcast messages to all connected users simultaneously.
-
-## 🧠 Smart Asset Caching
-Introduced an **`RwLock`** **RAM Cache** for static assets. Small files (<500KB) are served at RAM speeds (~50µs), while larger files are intelligently served via the OS Page Cache to prevent memory exhaustion.
-
-## 📈 Dynamic Nagle Control
-New builder-pattern support for `set_nagle(bool)`. Toggle between **Low Latency** (TCP_NODELAY) for real-time APIs or **High Throughput** for massive data synchronization.
-
-## 🧬 Concurrency Comparison
-
-| Feature          | Traditional Async (Tokio)  | WebIO v0.5.0 (OS Threads)   |
-| ---------------- | -------------------------- | --------------------------- |
-| **Heavy Math**   | ❌ Blocks the Event Loop    | ✅ Isolated per CPU Core     |
-| **Tail Latency** | ⚠️ Variable (Task Stealing) | ✅ Ultra-Low (Spin-Wait)     |
-| **Memory**       | ⚠️ Managed by Runtime       | ✅ Deterministic (Ownership) |
-| **Dependencies** | ❌ Hundreds                 | ✅ **Zero (std only)**       |
-
-## 🚀 Big Data POST Examples
-
-In WebIO, standard `POST` data is limited to **10MB** for RAM safety. For datasets exceeding this (e.g., 10GB CSVs or Videos), handlers must use the raw `stream` for **Zero-RAM Ingestion**.
-
-```rust,no_run
+```rust
 use webio::*;
 
-use std::io::{Write, Read, BufWriter};
+use std::io::{BufWriter};
 use std::fs::File;
 
 const INDEX_HTML: &str = r##"<!DOCTYPE html>
@@ -156,6 +89,8 @@ async fn my_custom_json_404(_req: Req, _params: Params) -> Reply {
         .header("Content-Type", "application/json")
         .body("{\"error\": \"not_found\", \"code\": 404, \"source\": \"WebIo API\"}")
 }
+
+use std::io::{Write, Read};
 
 async fn handle_big_csv(mut req: Req, _params: Params) -> Reply {
     let mut file = std::fs::File::create("huge_dataset.csv").unwrap();
@@ -262,4 +197,3 @@ fn main() {
     // app.run("0.0.0.0", "8080");
 }
 ```
-

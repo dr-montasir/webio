@@ -17,7 +17,7 @@ use std::thread;
 fn test_hello_world() {
     // 1. Spawn the WebIO server in a background thread
     thread::spawn(|| {
-        launch(async {
+        block_on(async {
             let mut app = WebIo::new();
 
             app.route(GET, "/", |_req, _params| async {
@@ -27,7 +27,7 @@ fn test_hello_world() {
             });
 
             // Using 8080 for this specific integration test
-            app.run("127.0.0.1", "8080").await;
+            app.run("127.0.0.1", "8080");
         });
     });
 
