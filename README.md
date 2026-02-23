@@ -1,12 +1,49 @@
+<div align="center">
+  <br>
+  <a href="https://github.com/dr-montasir/webio" target="_blank">
+      <img src="https://github.com/dr-montasir/webio/raw/HEAD/webio-logo/logo/webio-logo-288x224-no-text-no-bg.svg" width="100">
+  </a>
+  <br>
+</div>
+
 # WebIO 🦅
 
 > **A minimalist, high-performance web framework for Rust built with a zero-dependency philosophy.**
+**Built exclusively on the Rust Standard Library (`std`), WebIO achieves an ultra-light footprint, lightning-fast compilation, and a transparent security audit trail.**
 
 <div style="text-align: center;">
   <a href="https://github.com/dr-montasir/webio"><img src="https://img.shields.io/badge/github-dr%20montasir%20/%20webio-8da0cb?style=for-the-badge&labelColor=555555&logo=github" height="24" style="margin-top: 10px;" alt="github" /></a> <a href="https://crates.io/crates/webio"><img src="https://img.shields.io/crates/v/webio.svg?style=for-the-badge&color=fc8d62&logo=rust" height="24" style="margin-top: 10px;" alt="crates.io"></a> <a href="https://docs.rs/webio"><img src="https://img.shields.io/badge/docs.rs-webio-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="24" style="margin-top: 10px;" alt="docs.rs"></a> <a href="https://choosealicense.com/licenses/mit"><img src="https://img.shields.io/badge/license-mit-4a98f7.svg?style=for-the-badge&labelColor=555555" height="24" style="margin-top: 10px;" alt="license"></a>
 </div>
 
 ---
+## Why WebIO?
+
+WebIO is a zero-dependency Rust web framework engineered to prevent "event loop freeze" during heavy calculations. By relying strictly on the **Rust Standard Library**, it prioritizes memory predictability and raw performance for data science and computational tasks.
+This minimalist engine utilizes dedicated **OS threads** for each connection to ensure non-blocking, pre-emptive multitasking. Featuring a "Safe-Turbo" executor with a custom spin-loop for ultra-low latency and O(1) memory complexity for big data ingestion, WebIO provides a high-integrity implementation for high-stakes environments.
+
+### 🔬 The Rationale: WebIO vs. External Runtimes (Tokio/Hyper)
+
+Most modern Rust web frameworks (like Axum or Actix) are built on top of **Tokio**, a high-performance asynchronous event-loop. While excellent for handling millions of *idle* connections (like a chat app), Tokio faces a "Cooperative Scheduling" challenge in **Data Science** and **Computational** environments.
+
+### 🧠 The "Event Loop Freeze" Problem
+In a traditional async runtime, tasks must "yield" voluntarily to the executor. If a single request performs a heavy 10-second mathematical calculation—such as a regression model, matrix inversion, or a large CSV parse—the **entire event loop thread is blocked**. This creates a "Stop-the-World" scenario where one heavy CPU task freezes the responses for all other users on that executor.
+
+### 🚀 The WebIO Solution: Go-Inspired OS Pre-emption
+WebIO is engineered as a specialized core engine for projects like **Fluxor**, where mathematical precision and memory predictability are the highest priority. 
+
+**WebIO provides a Go-like concurrency experience** but utilizes raw **OS Threads** for true kernel-level isolation. This ensures high efficiency for both small JSON responses and large "Big Data" streaming.
+
+* **The Safety Distinction:** While WebIO adopts the **"goroutine-per-request model"** strategy found in Go, it enforces **Rust’s Ownership Model**. This provides the concurrency simplicity of Go without the unpredictable latency of a Garbage Collector (GC). Deterministic memory management ensures no "GC pauses" occur during heavy mathematical calculations, providing consistent performance for high-stakes computational tasks.
+
+* **OS-Level Isolation:** Utilizing **OS Threads** managed by the Kernel achieves pre-emptive multitasking. If one handler is 100% occupied by heavy math on Core 1, the OS automatically ensures other threads remain responsive on other cores. This architecture eliminates the risk of "blocking the loop."
+* **Safe-Turbo Bridge:** While WebIO uses OS threads for isolation, a specialized **`block_on`** executor allows the use of `async` logic (like calling an external API or database) inside threads without the bloat of a massive dependency tree.
+* **Zero-RAM Big Data:** Raw `TcpStream` access enables moving 100GB+ datasets directly from the socket to disk in 64KB chunks. This bypasses the 10MB RAM safety guard, ensuring the engine remains stable under massive data ingestion.
+
+## 🛠️ Performance Architecture
+* **Hybrid Spin-Wait Strategy:** The `block_on` executor uses a 150k-cycle spin-loop to catch I/O ready states in nanoseconds, maintaining sub-millisecond tail latency by bypassing OS scheduler jitter for "hot" tasks.
+* **Smart RAM Cache:** Transparently caches hot assets (<500KB) using an `RwLock` to provide **~50µs** RAM-speed delivery for CSS/JS/JSON, while large files stream safely from the Disk.
+* **Zero-Dependency Integrity:** By strictly avoiding external crates, WebIO is immune to "supply chain attacks" and remains a pure, high-performance core for Computing Science and Mathematical applications.
+* **Nagle Control:** Granular builder-pattern control over TCP throughput vs. latency (set_nagle) optimizes for either real-time APIs or massive data syncs.
 
 ## 🧪 Research Status: Experimental
 **WebIO** is currently in an active **research and development phase**. 
@@ -27,7 +64,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-webio = "0.5.0-alpha"
+webio = "0.6.0-alpha"
 ```
 
 ## 🚀 What's New in v0.5.0-alpha
@@ -63,7 +100,7 @@ New builder-pattern support for `set_nagle(bool)`. Toggle between **Low Latency*
 
 ## 🚀 Big Data POST Examples
 
-In WebIO, standard `POST` data is limited to **10MB** for RAM safety. For datasets exceeding this (e.g., 10GB CSVs or Videos), handlers must use the raw `stream` for **Zero-RAM Ingestion**.
+WebIO limits standard `POST` data to **10MB** for RAM safety, requiring the use of `req.stream` for **zero-RAM ingestion** of large datasets exceeding this limit. This approach ensures O(1) memory complexity, allowing files of any size (e.g., 10GB+ CSVs or videos) to be streamed directly to disk, keeping RAM usage flat. For more information, visit [WebIO documentation](https://docs.rs/webio/latest/webio).
 
 ```rust,no_run
 use webio::*;
@@ -168,6 +205,7 @@ async fn handle_big_csv(mut req: Req, _params: Params) -> Reply {
     Reply::new(StatusCode::Ok).body("Upload Complete")
 }
 
+/// Video upload handler
 async fn handle_video_upload(mut req: Req, _params: Params) -> Reply {
     // 1. Create the destination file
     let file_path = "uploads/video_data.mp4";
@@ -197,6 +235,7 @@ async fn handle_video_upload(mut req: Req, _params: Params) -> Reply {
         .body(format!(r#"{{"status": "success", "bytes_saved": {}}}"#, total_bytes))
 }
 
+/// Chat handler
 async fn chat_handler(req: Req, _params: Params) -> Reply {
     // 1. Upgrade to WebSocket
     if let Some(mut ws) = req.upgrade_websocket() {

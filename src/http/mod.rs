@@ -1,1 +1,0 @@
-// Protocol types (Req, Reply, Method, StatusCode)
