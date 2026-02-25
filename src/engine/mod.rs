@@ -24,7 +24,7 @@ use std::thread;
 use std::path::{Path, PathBuf};
 use std::future::Future;
 
-use crate::core::*;
+use crate::{core::*, mime};
 use crate::utils::{find_file_recursive, encode_ws_frame};
 
 /// Supported HTTP Methods.
@@ -35,6 +35,7 @@ pub use Method::*;
 /// Manages routing, middleware, and the internal TCP lifecycle.
 pub struct WebIo {
     routes: Vec<(String, String, Handler)>,
+    pub mime_types: HashMap<String, String>,
     mw: Option<Middleware>,
     handlers_404: HashMap<String, Handler>,
     static_dir: String,
@@ -48,7 +49,8 @@ impl WebIo {
     /// Initializes a new WebIo instance with an empty routing table.
     pub fn new() -> Self { 
         Self { 
-            routes: Vec::new(), 
+            routes: Vec::new(),
+            mime_types: mime::default_mime_types(),
             mw: None, 
             handlers_404: HashMap::new() ,
             static_dir: "assets".to_string(), // Default name ==> "assets"
@@ -164,22 +166,102 @@ impl WebIo {
         None
     }
 
-    /// Helper: Logic for MIME types and building the Reply object
-    fn build_reply_with_mime(&self, path: &Path, content: Vec<u8>) -> Reply {
-        let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("");
-        
-        let ct = match ext {
-            "ico"  => "image/x-icon",
-            "css"  => "text/css",
-            "js"   => "application/javascript",
-            "svg"  => "image/svg+xml",
-            "png"  => "image/png",
-            "jpg" | "jpeg" => "image/jpeg",
-            "gif"  => "image/gif",
-            "mp4"  => "video/mp4",
-            _      => "application/octet-stream",
-        };
+    /// Sets (adds or updates) a single MIME type mapping in the registry.
+    /// 
+    /// If the extension already exists, the associated MIME type is updated 
+    /// to the new value.
+    /// 
+    /// # Arguments
+    /// * `ext` - The file extension (e.g., "webp").
+    /// * `mime` - The corresponding MIME media type (e.g., "image/webp").
+    /// 
+    /// # Example
+    /// ```
+    /// use webio::*;
+    /// let mut app = WebIo::new();
+    /// app.set_mime("webp", "image/webp");
+    /// ```
+    pub fn set_mime(&mut self, ext: &str, mime: &str) {
+        mime::set_mime_logic(&mut self.mime_types, ext, mime);
+    }
 
+    /// Sets multiple MIME type mappings at once.
+    /// 
+    /// Useful for bulk-updating the registry from a configuration list.
+    /// 
+    /// # Arguments
+    /// * `types` - A vector of tuples containing `(extension, mime_type)`.
+    /// 
+    /// # Example
+    /// ```
+    /// use webio::*;
+    /// let mut app = WebIo::new();
+    /// app.set_mimes(vec![("woff2", "font/woff2"), ("wasm", "application/wasm")]);
+    /// ```
+    pub fn set_mimes(&mut self, types: Vec<(&str, &str)>) {
+        mime::set_mimes_logic(&mut self.mime_types, types);
+    }
+
+    /// Removes a single MIME type mapping from the registry.
+    /// 
+    /// If the extension is not found in the registry, the function does nothing.
+    /// 
+    /// # Arguments
+    /// * `ext` - The file extension to be removed (e.g., "php").
+    /// 
+    /// # Example
+    /// ```
+    /// use webio::*;
+    /// let mut app = WebIo::new();
+    /// // Disable serving of PHP files
+    /// app.remove_mime("php");
+    /// ```
+    pub fn remove_mime(&mut self, ext: &str) {
+        mime::remove_mime_logic(&mut self.mime_types, ext);
+    }
+
+    /// Removes multiple MIME type mappings from the registry at once.
+    /// 
+    /// Ideal for disabling entire categories of files (e.g., all video formats).
+    /// 
+    /// # Arguments
+    /// * `exts` - A vector of file extensions to be removed.
+    /// 
+    /// # Example
+    /// ```
+    /// use webio::*;
+    /// let mut app = WebIo::new();
+    /// // Disable multiple video formats
+    /// let to_remove = vec!["mp4", "webm", "avi", "mov"];
+    /// app.remove_mimes(to_remove);
+    /// ```
+    pub fn remove_mimes(&mut self, exts: Vec<&str>) {
+        mime::remove_mimes_logic(&mut self.mime_types, exts);
+    }
+
+    /// Internal helper to look up MIME types and construct a `Reply` object.
+    /// 
+    /// This method extracts the file extension from the provided `Path`, 
+    /// performs a case-insensitive lookup in the registry, and sets the 
+    /// `Content-Type` header accordingly.
+    /// 
+    /// # Fallback
+    /// If no extension is found or the extension is unknown, it defaults 
+    /// to `application/octet-stream`.
+    fn build_reply_with_mime(&self, path: &Path, content: Vec<u8>) -> Reply {
+        // 1. Extract the extension, convert to string, and handle case-sensitivity
+        let ext = path.extension()
+            .and_then(|s| s.to_str())
+            .map(|s| s.to_lowercase()) // Ensures .JPG and .jpg both work
+            .unwrap_or_default();
+        
+        // 2. Dynamic lookup in the HashMap
+        // If the extension isn't found, it fall back to "application/octet-stream".
+        let ct = self.mime_types.get(&ext)
+            .map(|s| s.as_str())
+            .unwrap_or("application/octet-stream");
+
+        // 3. Build and return the Reply
         Reply::new(StatusCode::Ok)
             .header("Content-Type", ct)
             .body(content)

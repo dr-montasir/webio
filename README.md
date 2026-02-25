@@ -64,7 +64,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-webio = "0.6.0-alpha"
+webio = "0.7.0-alpha"
 ```
 
 ## 🚀 What's New in v0.5.0-alpha

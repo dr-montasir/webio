@@ -1,6 +1,6 @@
 [package]
 name = "webio"
-version = "0.6.0-alpha"
+version = "0.7.0-alpha"
 authors = ["Montasir Mirghani <montasir@fluxor.one>"]
 edition = "2024"
 description = "A minimalist, high-performance web framework for Rust built with a zero-dependency philosophy."
