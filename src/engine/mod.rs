@@ -28,7 +28,83 @@ use crate::{core::*, mime};
 use crate::utils::{find_file_recursive, encode_ws_frame};
 
 /// Supported HTTP Methods.
-pub enum Method { GET, POST }
+pub enum Method {
+    /// Requests a representation of the specified resource.
+    /// 
+    /// This is the most common method, used to **Retrieve Data** (like HTML, 
+    /// images, or JSON) from the server without modifying any state.
+    GET,
+    /// Submits an entity to the specified resource.
+    /// 
+    /// Primarily used for **Form Submissions** or **Data Uploads**, 
+    /// often resulting in a change in state or side effects on the server.
+    POST,
+    /// Replaces all current representations of the target resource.
+    /// 
+    /// Used for **Full Updates**, where the client sends a complete 
+    /// version of the resource to overwrite the existing one.
+    PUT,
+    /// Applies partial modifications to a resource.
+    /// 
+    /// Ideal for **Incremental Updates**, allowing the client to 
+    /// modify only specific fields instead of replacing the entire object.
+    PATCH,
+    /// Deletes the specified resource.
+    /// 
+    /// This method is used to **Permanently Remove** a file, database 
+    /// record, or other resource identified by the URI.
+    DELETE,
+    /// Asks for a response identical to a GET request, but without the response body.
+    /// 
+    /// Extremely useful for **Meta-data Checks**, such as verifying file 
+    /// size or MIME type via headers before committing to a full download.
+    HEAD,
+    /// Used to describe the communication options for the target resource.
+    /// 
+    /// Essential for **CORS (Cross-Origin Resource Sharing)**, where 
+    /// browsers perform a "pre-flight" check to see which methods are permitted.
+    OPTIONS,
+    /// Establishes a tunnel to the server identified by the target resource.
+    /// 
+    /// Typically used for **SSL/TLS Proxying**, allowing secure 
+    /// communication to pass through intermediate servers.
+    CONNECT,
+    /// Performs a message loop-back test along the path to the target resource.
+    /// 
+    /// Primarily a **Diagnostic Tool**, it echoes back the received 
+    /// request so the client can see what changes proxies might be making.
+    TRACE,
+    /// Creates a duplicate of the source resource at the destination.
+    /// 
+    /// Primarily used in **File Management** to copy files or directories 
+    /// without downloading and re-uploading the data.
+    COPY,
+    /// Moves a resource from one URI to another.
+    /// 
+    /// Equivalent to a **Rename** or **Cut-and-Paste** operation on a 
+    /// remote file system.
+    MOVE,
+    /// Creates a new collection (folder/directory) at the specified location.
+    /// 
+    /// Used in **WebDAV** instead of `POST` or `PUT` to explicitly create 
+    /// directory structures.
+    MKCOL,
+    /// Retrieves properties (metadata) for a resource.
+    /// 
+    /// This is the most used WebDAV method. it allows the client to ask: 
+    /// "Is this a file or folder? What is its size? When was it modified?"
+    PROPFIND,
+    /// Used to "lock" a resource to prevent overwrite conflicts.
+    /// 
+    /// Essential for **Collaborative Editing**, ensuring only one user 
+    /// can modify a file at a time.
+    LOCK,
+    /// Removes a lock previously established by the LOCK method.
+    /// 
+    /// Replaces the resource in a "read-only" or "shared" state so 
+    /// other users can begin editing.
+    UNLOCK
+}
 pub use Method::*;
 
 /// The central Application controller.
@@ -312,7 +388,23 @@ impl WebIo {
     pub fn route<F, Fut>(&mut self, method: Method, path: &str, handler: F)
     where F: Fn(Req, Params) -> Fut + Send + Sync + 'static, Fut: Future<Output = Reply> + Send + 'static,
     {
-        let m = match method { GET => "GET", POST => "POST" }.to_string();
+        let m = match method { 
+            GET => "GET", 
+            POST => "POST",
+            PUT => "PUT",
+            PATCH => "PATCH",
+            DELETE => "DELETE",
+            HEAD => "HEAD",
+            OPTIONS => "OPTIONS",
+            CONNECT => "CONNECT",
+            TRACE => "TRACE",
+            COPY => "COPY",
+            MOVE => "MOVE",
+            MKCOL => "MKCOL",
+            PROPFIND => "PROPFIND",
+            LOCK => "LOCK",
+            UNLOCK => "UNLOCK"
+        }.to_string();
         self.routes.push((m, path.to_string(), Box::new(move |r, p| Box::pin(handler(r, p)))));
     }
 
