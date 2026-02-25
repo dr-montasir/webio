@@ -64,7 +64,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-webio = "0.7.0-alpha"
+webio = "0.8.0-alpha"
 ```
 
 ## 🚀 What's New in v0.5.0-alpha
@@ -211,7 +211,7 @@ async fn handle_video_upload(mut req: Req, _params: Params) -> Reply {
     let file_path = "uploads/video_data.mp4";
     let file = match File::create(file_path) {
         Ok(f) => f,
-        Err(_) => return Reply::new(StatusCode::InternalError).body("Could not create file"),
+        Err(_) => return Reply::new(StatusCode::InternalServerError).body("Could not create file"),
     };
 
     let mut writer = BufWriter::new(file);
@@ -223,7 +223,7 @@ async fn handle_video_upload(mut req: Req, _params: Params) -> Reply {
     while let Ok(n) = req.stream.read(&mut buffer) {
         if n == 0 { break; } // Socket closed or upload finished
         if let Err(_) = writer.write_all(&buffer[..n]) {
-            return Reply::new(StatusCode::InternalError).body("Disk Write Error");
+            return Reply::new(StatusCode::InternalServerError).body("Disk Write Error");
         }
         total_bytes += n as u64;
     }
