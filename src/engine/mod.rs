@@ -119,6 +119,7 @@ pub struct WebIo {
     pub nagle_enabled: bool,
     pub clients: Arc<Mutex<Vec<TcpStream>>>,
     pub cache: Arc<RwLock<HashMap<String, Vec<u8>>>>,
+    pub banner_text: String,
 }
 
 impl WebIo {
@@ -134,6 +135,7 @@ impl WebIo {
             nagle_enabled: true, // Default to ON (High Throughput)
             clients: Arc::new(Mutex::new(Vec::new())), 
             cache: Arc::new(RwLock::new(HashMap::new())),
+            banner_text: "🦅 WebIO Live:".to_string(), // Default banner_text ==> "🦅 WebIO Live:"
         }
     }
 
@@ -408,6 +410,22 @@ impl WebIo {
         self.routes.push((m, path.to_string(), Box::new(move |r, p| Box::pin(handler(r, p)))));
     }
 
+    /// Helper to determine the banner content.
+    ///
+    /// If `text` is empty, it returns the default framework message:
+    /// `"🦅 WebIO Live:"`. Otherwise, it returns the user-provided string.
+    ///
+    /// # Arguments
+    ///
+    /// * `text` - A string slice that holds the custom banner message.
+    fn rename_banner(text: &str) -> String {
+        if text.is_empty() {
+            "🦅 WebIO Live:".to_string()
+        } else {
+            format!("{}", text)
+        }
+    }
+
     /// Initializes the Multi-Threaded TCP Listener and enters the primary execution loop.
     /// 
     /// This method serves as the entry point for the **Go-inspired concurrency model**, 
@@ -429,6 +447,8 @@ impl WebIo {
     ///   interactive APIs or high-throughput **Big Data** ingestion.
     pub fn run(self, host: &str, port: &str) {
         let listener = TcpListener::bind(format!("{}:{}", host, port)).expect("Bind failed");
+        let banner = Self::rename_banner(&self.banner_text);
+        
         let app = Arc::new(self);
         
         // --- SAFETY VALVE: Thread Limit ---
@@ -436,7 +456,9 @@ impl WebIo {
         let active_threads = Arc::new(AtomicUsize::new(0));
         let max_threads = 2000; // Typical safe limit for OS threads
 
-        println!("🦅 WebIO Multi-Threaded Engine Live: http://{}:{}", host, port);
+        // Displays the server startup banner and the local access URL.
+        // This is the primary visual confirmation that the multi-threaded engine is live.
+        println!("{} http://{}:{}", banner, host, port);
 
         for stream in listener.incoming() {
             if let Ok(s) = stream {

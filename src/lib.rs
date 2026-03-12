@@ -10,7 +10,7 @@ pub mod mime;
 pub mod utils;
 
 // Re-exports for a clean public API
-pub use crate::core::*;
+pub use crate::core::*; 
 pub use crate::crypto::*;
 pub use crate::engine::*;
 pub use crate::mime::*;
