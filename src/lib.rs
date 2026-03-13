@@ -2,6 +2,10 @@
 
 #![doc = include_str!("../README.md")]
 
+#![doc = include_str!("../doc/00-documentation.md")]
+
+#![doc = include_str!("../doc/01-overview.md")]
+
 // Modules
 pub mod core;
 pub mod crypto;

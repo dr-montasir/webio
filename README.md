@@ -45,11 +45,12 @@ WebIO is engineered as a specialized core engine for projects like **Fluxor**, w
 * **Zero-Dependency Integrity:** By strictly avoiding external crates, WebIO is immune to "supply chain attacks" and remains a pure, high-performance core for Computing Science and Mathematical applications.
 * **Nagle Control:** Granular builder-pattern control over TCP throughput vs. latency (set_nagle) optimizes for either real-time APIs or massive data syncs.
 
-## 🧪 Research Status: Experimental
-**WebIO** is currently in an active **research and development phase**. 
-- **API Stability:** Expect breaking changes as we refine the core engine.
-- **Goal:** To provide a high-integrity core engine for **Data Science**, **Computing Science**, and frameworks like **Fluxor**.
-- **Production Warning:** Use with caution until the stable `1.0.0` released.
+## ✅ Production Ready: v1.0.0 Stable
+**WebIO is now a Stable Production Engine, moving beyond its initial research and development phase.**
+- **API Stability:** Starting with **v1.0.0**, WebIO follows strict semantic versioning. The core architecture and concurrency patterns are now locked for long-term stability.
+- **Legacy Research:** Versions below **1.0.0** (0.9.x and earlier) represent the research phase and may contain breaking changes or unstable patterns.
+- **The Goal:** To provide a **high-integrity, zero-dependency core** for high-performance web projects.
+- **Framework Foundation:** Much like Tokio or Axum, WebIO is a powerful base for building specialized tools. It is designed to be the **core foundation** for the <a href="https://fluxor.one" target="_blank"><strong>Fluxor</strong></a> Data Science framework and any other project requiring WebIO’s unique multi-threaded performance. 
 
 ## 🎯 Core Philosophy
 WebIO provides a fully functional web engine with **zero external dependencies**. By strictly utilizing the Rust std library, it ensures an ultra-light footprint, rapid compilation, and total memory predictability.
@@ -60,15 +61,22 @@ WebIO provides a fully functional web engine with **zero external dependencies**
 - **Just pure, high-performance Rust**.
 
 ## 🛠️ Installation
-Add this to your `Cargo.toml`:
+
+To include **webio** in your Rust project, run:
+
+```shell
+cargo add webio
+```
+
+Or add **webio** to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-webio = "0.9.0-alpha"
+webio = "MAJOR.MINOR.PATCH" # replace with the actual version
 ```
 
-## 🚀 What's New in v0.5.0-alpha
-The `v0.5.0-alpha` release represents a major architectural shift from a single-threaded async model to a **High-Performance Multi-threaded Hybrid Engine** inspired by the Go concurrency model.
+## 💎 What Makes WebIO Unique?
+WebIO is a **High-Performance, Zero-Dependency, Multi-threaded Hybrid Engine** inspired by the Go concurrency model. Unlike traditional runtimes, it provides deterministic performance by moving away from complex task-stealing to a direct OS-thread strategy. This ensures that heavy CPU tasks never block the event loop, maintaining ultra-low tail latency (~200µs) with zero external dependencies.
 
 ## 🧵 Go-Inspired Multi-threading
 WebIO now mimics the Go strategy by spawning a unique **OS Thread** for every incoming connection. This ensures **Pre-emptive Multitasking**: a heavy mathematical calculation on one thread will never "freeze" the server for other users—a common pitfall in traditional async runtimes like Tokio.
@@ -98,9 +106,11 @@ New builder-pattern support for `set_nagle(bool)`. Toggle between **Low Latency*
 | **Memory**       | ⚠️ Managed by Runtime       | ✅ Deterministic (Ownership) |
 | **Dependencies** | ❌ Hundreds                 | ✅ **Zero (std only)**       |
 
-## 🚀 Big Data POST Examples
+## 🚀 Big Data Streaming
 
-WebIO limits standard `POST` data to **10MB** for RAM safety, requiring the use of `req.stream` for **zero-RAM ingestion** of large datasets exceeding this limit. This approach ensures O(1) memory complexity, allowing files of any size (e.g., 10GB+ CSVs or videos) to be streamed directly to disk, keeping RAM usage flat. For more information, visit [WebIO documentation](https://docs.rs/webio/latest/webio).
+WebIO limits standard `request` bodies to **10MB** for RAM safety, requiring the use of `req.stream()` for **zero-RAM ingestion** of large datasets exceeding this limit. This approach ensures O(1) memory complexity, allowing files of any size (e.g., 10GB+ CSVs or videos) to be streamed directly to storage, while maintaining flat RAM usage. For more information, visit [WebIO documentation](https://docs.rs/webio/latest/webio).
+
+## 📋 Examples
 
 ```rust,no_run
 use webio::*;
@@ -302,3 +312,10 @@ fn main() {
 }
 ```
 
+---
+
+## ⚖️ License
+
+**WebIO** is released under the **MIT License**.
+
+---
