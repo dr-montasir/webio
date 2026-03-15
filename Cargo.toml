@@ -1,9 +1,9 @@
 [package]
 name = "webio"
-version = "0.9.1-alpha"
-authors = ["Montasir Mirghani <montasir@fluxor.one>"]
+version = "0.9.2-alpha"
+authors = ["Montasir Mirghani <montasir@webio.tech>"]
 edition = "2024"
-description = "A minimalist, high-performance web framework for Rust built with a zero-dependency philosophy."
+description = "A minimalist, high-performance Rust web framework built with a zero-dependency philosophy for maximum speed and low memory footprint."
 license = "MIT"
 homepage = "https://webio.tech"
 repository = "https://github.com/dr-montasir/webio"
@@ -17,7 +17,8 @@ exclude = [
     "webio-logo/**",
     "Cargo.lock",
     "dev.md",
-    ".env"
+    ".env",
+    ".env.example",
 ]
 
 [dependencies]

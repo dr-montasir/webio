@@ -1,10 +1,10 @@
 #![doc(html_logo_url = "https://github.com/dr-montasir/webio/raw/HEAD/webio-logo/logo/webio-logo-288x224-no-text-no-bg.svg")]
 
-#![doc = include_str!("../README.md")]
-
-#![doc = include_str!("../doc/00-documentation.md")]
-
+#![doc = include_str!("../doc/00-head.md")]
 #![doc = include_str!("../doc/01-overview.md")]
+#![doc = include_str!("../doc/02-philosophy.md")]
+#![doc = include_str!("../doc/03-installation.md")]
+#![doc = include_str!("../doc/04-quick-start.md")]
 
 // Modules
 pub mod core;
