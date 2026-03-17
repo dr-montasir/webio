@@ -12,7 +12,6 @@ keywords = ["std", "web", "async", "io", "nodeps"]
 categories = ["network-programming", "asynchronous", "web-programming::http-server"]
 exclude = [
     ".github/**",
-    "doc/**",
     "examples/**",
     "tests/**",
     "webio-logo/**",

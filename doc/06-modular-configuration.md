@@ -177,3 +177,70 @@ fn main() {
     app.run("127.0.0.1", "8080");
 }
 ```
+
+## 6-3. 📂 Static Folder
+
+Serving static assets like **CSS**, **JavaScript**, and **images** is essential for web applications. `WebIo` provides a simple way to map a local directory to the server root, allowing files to be linked directly in HTML.
+
+1. **Project Structure**
+
+Organizing assets into a dedicated folder (e.g., `assets`) keeps the project clean. Typical layout:
+
+```shell
+my_webio_project
+├───assets
+│   ├───css
+│   │   └───styles.css
+│   ├───images
+│   │   ├───favicon.ico
+│   │   └───logo.svg
+│   └───js
+│       └───script.js
+├───src
+│   └───main.rs
+└───Cargo.toml
+```
+
+2. **Implementation**
+
+Registering a directory with `app.use_static("folder_name")` informs the server where to look for files. For example, once the assets folder is registered, a file located at `assets/css/styles.css` is served directly at the URL path `/css/styles.css`.
+
+```rust,no_run
+use webio::*;
+
+// HTML template linking to static assets
+const CONTENT: &str = r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Paths match the structure inside the 'assets' folder -->
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script defer src="/js/script.js"></script>
+    <title>My WebIo Project</title>
+</head>
+<body>
+    <a href="/">
+        <img src="/images/logo.svg" alt="Logo">
+    </a>
+</body>
+</html>"#;
+
+async fn home_handler(_req: Req, _p: Params) -> Reply {
+    Reply::new(StatusCode::Ok)
+        .header("Content-Type", "text/html; charset=UTF-8")
+        .body(CONTENT)
+}
+
+fn main() {
+    let mut app = WebIo::new();
+    
+    // Map the "assets" directory to the URL root "/"
+    app.use_static("assets");
+
+    app.route(GET, "/", home_handler);
+
+    app.run("127.0.0.1", "8080");
+}
+```
