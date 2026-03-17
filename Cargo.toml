@@ -1,6 +1,6 @@
 [package]
 name = "webio"
-version = "0.9.4-alpha"
+version = "0.9.5-alpha"
 authors = ["Montasir Mirghani <montasir@webio.tech>"]
 edition = "2024"
 description = "A minimalist, high-performance Rust web framework built with a zero-dependency philosophy for maximum speed and low memory footprint."
@@ -12,6 +12,7 @@ keywords = ["std", "web", "async", "io", "nodeps"]
 categories = ["network-programming", "asynchronous", "web-programming::http-server"]
 exclude = [
     ".github/**",
+    "doc/**",
     "examples/**",
     "tests/**",
     "webio-logo/**",
