@@ -1,8 +1,8 @@
-# 🧩 Modular Configuration
+# 6. 🧩 Modular Configuration
 
 WebIO supports separating routing and middleware logic into dedicated setup functions to keep `main` clean.
 
-## 🗺️ Modular Route Setup
+## 6-1. 🗺️ Routes Setup
 
 Encapsulating routes in a `setup_routes` function allows for better organization, especially as the application grows in complexity.
 
@@ -35,7 +35,7 @@ fn main() {
 }
 ```
 
-## 🔐 Modular Middleware Setup
+## 6-2. 🔐 Middlewares Setup
 
 Middleware in WebIO acts as a **Pre-flight Guard**. By defining a `setup_middlewares` function, the engine can intercept requests for authentication, logging, or IP blacklisting before they reach the routing table.
 
@@ -77,7 +77,7 @@ fn setup_middlewares(app: &mut WebIo) {
 // --- Dynamic Route Handler ---
 async fn secret_handler(_req: Req, params: Params) -> Reply {
     // Extract the <key> from the URL
-    let key = params.0.get("key").cloned().unwrap_or("unknown".to_string());
+    let key = params.0.get("key").cloned().unwrap_or_default();
     
     Reply::new(StatusCode::Ok)
         .header("Content-Type", "text/html; charset=UTF-8")
@@ -140,7 +140,7 @@ async fn admin_handler(_req: Req, _p: Params) -> Reply {
 }
 
 async fn protected_handler(_req: Req, params: Params) -> Reply {
-    let key = params.0.get("key").cloned().unwrap_or("unknown".to_string());
+    let key = params.0.get("key").cloned().unwrap_or_default();
     Reply::new(StatusCode::Ok)
         .header("Content-Type", "text/html; charset=UTF-8")
         .body(format!("<h1>🛡️ Protected Area</h1><p>Key: <b>{}</b></p>", key))

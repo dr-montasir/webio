@@ -5,7 +5,10 @@
 #![doc = include_str!("../doc/02-philosophy.md")]
 #![doc = include_str!("../doc/03-installation.md")]
 #![doc = include_str!("../doc/04-quick-start.md")]
-#![doc = include_str!("../doc/05-modular-configuration.md")]
+#![doc = include_str!("../doc/05-dynamic-routing.md")]
+#![doc = include_str!("../doc/06-modular-configuration.md")]
+#![doc = include_str!("../doc/07-custom-404-handlers.md")]
+#![doc = include_str!("../doc/08-custom-startup-banner.md")]
 
 // Modules
 pub mod core;
