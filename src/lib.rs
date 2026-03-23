@@ -7,8 +7,8 @@
 #![doc = include_str!("../doc/04-quick-start.md")]
 #![doc = include_str!("../doc/05-dynamic-routing.md")]
 #![doc = include_str!("../doc/06-modular-configuration.md")]
-#![doc = include_str!("../doc/07-custom-404-handlers.md")]
-#![doc = include_str!("../doc/08-custom-startup-banner.md")]
+#![doc = include_str!("../doc/07-log-reply.md")]
+#![doc = include_str!("../doc/08-application-tailoring.md")]
 
 // Modules
 pub mod core;
