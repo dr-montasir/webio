@@ -219,8 +219,8 @@ WebIO scalability reaches raw hardware limits. Processing **1,000,000,000 bytes*
 
 This chart visually confirms the **Perfect Linear Scaling** of the WebIO engine. As the data volume grows from 1MB to 2GB, the execution time increases in a straight, predictable line, proving that the framework introduces no internal bottlenecks or "performance cliffs."
 
-<div align="center">
-  <img src="performance.svg" width="75%">
+<div align="left">
+  <img src="performance.svg" width="100%">
 </div>
 
 ### 📊 WebIO Performance Scaling Summary
