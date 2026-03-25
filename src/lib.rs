@@ -9,6 +9,7 @@
 #![doc = include_str!("../doc/06-modular-configuration.md")]
 #![doc = include_str!("../doc/07-log-reply.md")]
 #![doc = include_str!("../doc/08-application-tailoring.md")]
+#![doc = include_str!("../doc/09-application-settings.md")]
 
 // Modules
 pub mod core;

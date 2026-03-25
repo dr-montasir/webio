@@ -1,0 +1,44 @@
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="500" fill="#0a0a0a" />
+  
+  <!-- Grid Lines -->
+  <line x1="80" y1="420" x2="750" y2="420" stroke="#333" stroke-width="1" />
+  <line x1="80" y1="320" x2="750" y2="320" stroke="#333" stroke-width="1" stroke-dasharray="5,5" />
+  <line x1="80" y1="220" x2="750" y2="220" stroke="#333" stroke-width="1" stroke-dasharray="5,5" />
+  <line x1="80" y1="120" x2="750" y2="120" stroke="#333" stroke-width="1" stroke-dasharray="5,5" />
+  <line x1="80" y1="50" x2="750" y2="50" stroke="#333" stroke-width="1" stroke-dasharray="5,5" />
+  
+  <!-- Axes Labels -->
+  <text x="400" y="470" fill="white" font-family="Arial" font-size="14" text-anchor="middle">Data Volume (MB)</text>
+  <text x="30" y="235" fill="white" font-family="Arial" font-size="14" text-anchor="middle" transform="rotate(-90 30,235)">Time (ms)</text>
+  <text x="400" y="30" fill="#00d4ff" font-family="Arial" font-size="18" font-weight="bold" text-anchor="middle">WebIO Scalability: Linear Performance (1MB to 2GB)</text>
+  
+  <!-- Data Line (Points: 1/154, 10/160, 100/245, 1000/1030, 2000/2000) -->
+  <polyline fill="none" stroke="#00d4ff" stroke-width="3" points="80,391 83,390 113,374 415,229 750,50" />
+  
+  <!-- Markers and Labels -->
+  <circle cx="80" cy="391" r="5" fill="#00d4ff" />
+  <text x="70" y="380" fill="white" font-family="Arial" font-size="10">1MB</text>
+  
+  <circle cx="83" cy="390" r="5" fill="#00d4ff" />
+  <text x="95" y="405" fill="white" font-family="Arial" font-size="10">10MB</text>
+  
+  <circle cx="113" cy="374" r="5" fill="#00d4ff" />
+  <text x="110" y="360" fill="white" font-family="Arial" font-size="10">100MB</text>
+  
+  <circle cx="415" cy="229" r="6" fill="#00d4ff" />
+  <text x="410" y="215" fill="white" font-family="Arial" font-size="12" font-weight="bold">1GB</text>
+  
+  <circle cx="750" cy="50" r="8" fill="#00d4ff" />
+  <text x="730" y="40" fill="white" font-family="Arial" font-size="12" font-weight="bold">2GB</text>
+  
+  <!-- Axis Values -->
+  <text x="80" y="440" fill="#888" font-family="Arial" font-size="10" text-anchor="middle">0</text>
+  <text x="415" y="440" fill="#888" font-family="Arial" font-size="10" text-anchor="middle">1000</text>
+  <text x="750" y="440" fill="#888" font-family="Arial" font-size="10" text-anchor="middle">2000</text>
+  
+  <text x="70" y="420" fill="#888" font-family="Arial" font-size="10" text-anchor="end">0</text>
+  <text x="70" y="220" fill="#888" font-family="Arial" font-size="10" text-anchor="end">1000</text>
+  <text x="70" y="50" fill="#888" font-family="Arial" font-size="10" text-anchor="end">2000</text>
+</svg>
