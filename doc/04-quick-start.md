@@ -2,7 +2,7 @@
 
 WebIO provides a highly flexible routing system. These examples demonstrate a basic server using the **4-1. Closure Pattern** for rapid development and the **4-2. Handler Pattern** for structured, modular applications.
 
-## ✔️ 4-1. Closure Pattern
+## 4-1. ✔️ Closure Pattern
 
 The closure pattern allows for defining logic directly within the route registration. This approach is ideal for maintaining full engine control with minimal boilerplate in smaller projects.
 
@@ -22,7 +22,7 @@ fn main() {
 }
 ```
 
-## ✔️ 4-2. Handler Pattern
+## 4-2. ✔️ Handler Pattern
 
 The handler pattern isolates logic into dedicated `async` functions. This is the recommended approach for production-grade applications to ensure the codebase remains clean and testable.
 

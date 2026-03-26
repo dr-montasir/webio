@@ -10,6 +10,7 @@
 #![doc = include_str!("../doc/07-log-reply.md")]
 #![doc = include_str!("../doc/08-application-tailoring.md")]
 #![doc = include_str!("../doc/09-application-settings.md")]
+#![doc = include_str!("../doc/10-extensions.md")]
 
 // Modules
 pub mod core;

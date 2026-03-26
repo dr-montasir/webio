@@ -1,4 +1,4 @@
-# ⚙️ 9. Application Settings
+# 9. ⚙️ Application Settings
 
 WebIO provides **low-level control** over the underlying TCP stack and memory management. These settings optimize the engine for different workloads, ranging from `real-time messaging` to `massive data ingestion`.
 
