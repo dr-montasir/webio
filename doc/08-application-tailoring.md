@@ -1,8 +1,8 @@
-# 8. 🖱️ Application Tailoring
+# 8. Application Tailoring
 
 **WebIO** provides built-in methods to easily customize and personalize application behavior and visual identity.
 
-## 8-1. 🚨 Custom 404 Handlers
+## 8-1. Custom 404 Handlers
 
 **WebIO** allows overriding the default `"Not Found"` response. By using the `on_404` method, custom logic can be registered to handle missing routes differently based on the client type.
 
@@ -17,7 +17,7 @@ use webio::*;
 
 const CUSTOM_404_HTML: &str = r#"
     <div style='text-align:center; font-family:sans-serif;'>
-        <h1 style='color:red;'>🛸 404 - Not Found</h1>
+        <h1 style='color:red;'>404 - Not Found</h1>
         <p>That page doesn't exist on WebIo!</p>
     </div>
 "#;
@@ -65,7 +65,7 @@ fn main() {
 }
 ```
 
-## 8-2. 🏳️ Custom Startup Banner
+## 8-2. Custom Startup Banner
 
 **WebIO** includes a professional default banner while offering full override capabilities. Assigning a value to the `banner_text` field before calling `.run()` enables:
 
@@ -93,3 +93,5 @@ fn main () {
     app.run("127.0.0.1", "8080");
 }
 ```
+
+---

@@ -1,8 +1,8 @@
-# 10. 📗 Extensions
+# 10. Extensions
 
 While **WebIO** remains dependency-free at its core, the ecosystem provides optional extensions to enhance developer productivity. These crates are built following the same "Pure Rust" philosophy—prioritizing performance, minimal overhead, and seamless integration with the WebIO engine.
 
-## 10-1. 🎲 forge-rsx
+## 10-1. Forge RSX
 
 <a href="https://crates.io/crates/forge-rsx" target="_blank"><b>Forge-rsx</b></a> stands as a high-performance HTML macro engine for Rust. It enables type-safe, JSX-like template authoring directly within source files, compiling them into optimized strings at build time.
 
@@ -42,7 +42,7 @@ fn main () {
 
 <div><a href="https://crates.io/crates/forge-rsx" target="_blank">🔗 <b>View forge-rsx Documentation</b></a></div>
 
-## 10-2. 🎲 webio_macros
+## 10-2. WebIo Macros
 
 <a href="https://crates.io/crates/webio_macros" target="_blank"><b>webio_macros</b></a> provides procedural macro support to reduce boilerplate. It introduces attribute-based routing and streamlined handler definitions, making the codebase cleaner for large-scale applications.
 
@@ -61,24 +61,48 @@ use webio_macros::{webio_main, html};
 async fn main() {
     let mut app = WebIo::new();
 
+    // Enable live performance logging
     app.log_reply_enabled = true;
 
-    block_on(async {
-        app.route(GET, "/", |_req, _params| async move {
-            let content = html!("<h1>Hello from 🦅 {{name}}!</h1>", name = "WebIO");
-            Reply::new(StatusCode::Ok)
-                .header("Content-Type", "text/html; charset=UTF-8")
-                .body(content)
-        });
+    // Standard Async Route: No 'block_on' needed inside #[webio_main]
+    app.route(GET, "/", |_req, _params| async {
+        // Using the 'html!' macro for clean, reactive-style templating
+        let content = html!("<h1>Hello from 🦅 {{name}}!</h1>", name = "WebIO");
+        
+        Reply::new(StatusCode::Ok)
+            .header("Content-Type", "text/html; charset=UTF-8")
+            .body(content)
     });
 
+    // Configuration and Launch
     app.set_nagle(false).run("0.0.0.0", "8080");
 }
 ```
 
+**Live Output Preview**
+
+The terminal provides real-time monitoring of every incoming request. With `app.log_reply_enabled` set to `true`, you get a clear view of the `HTTP method`, `requested path`, `status code`, and precise execution time.
+
+```shell
+🦅 WebIO Live: http://0.0.0.0:8080
+[16:27:13] GET /no-block-on -> 404 (1.9506ms)
+[16:27:17] GET / -> 200 (79.9µs)
+[16:27:19] GET / -> 200 (236.4µs)
+[16:27:19] GET / -> 200 (97.6863ms)
+[16:27:20] GET / -> 200 (139.1µs)
+```
+
+**Performance Breakdown**
+
+The Live Output Preview reflects the engine's efficiency:
+
+- **Ultra-Low Latency:** The second request completed in just **`79.9µs`** (microseconds). This represents the raw speed of the WebIO routing engine and the zero-overhead html! macro.
+- **Smart 404 Handling:** The request to /no-block-on correctly returned a 404 in 1.95ms, demonstrating active monitoring and routing for missing endpoints.
+- **Cold Start vs. Hot Cache:** Variations in time (such as the 97.6ms entry) typically account for initial `TCP handshakes` or browser-side resource loading. Consistent **`139.1µs`** entries confirm the sustained "warm" performance of the Rust binary.
+
 <div><a href="https://crates.io/crates/webio_macros" target="_blank">🔗 <b>View webio_macros Documentation</b></a></div>
 
-## 10-3. 🎲 Crator
+## 10-3. Crator
 
 <a href="https://crates.io/crates/crator" target="_blank"><b>Crator</b></a> is the official Rust high-performance toolkit for **`HTTP/HTTPS`** requests, **`JSON`** processing, and **environment management**.
 
@@ -172,3 +196,5 @@ fn main() {
 ```      
 
 <div><a href="https://crates.io/crates/crator" target="_blank">🔗 <b>View crator Documentation</b></a></div>
+
+---

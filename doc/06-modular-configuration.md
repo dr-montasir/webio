@@ -1,8 +1,8 @@
-# 6. 🧩 Modular Configuration
+# 6. Modular Configuration
 
 WebIO supports separating routing and middleware logic into dedicated setup functions to keep `main` clean.
 
-## 6-1. 🗺️ Routes Setup
+## 6-1. Routes Setup
 
 Encapsulating routes in a `setup_routes` function allows for better organization, especially as the application grows in complexity.
 
@@ -35,7 +35,7 @@ fn main() {
 }
 ```
 
-## 6-2. 🔐 Middlewares Setup
+## 6-2. Middlewares Setup
 
 Middleware in WebIO acts as a **Pre-flight Guard**. By defining a `setup_middlewares` function, the engine can intercept requests for authentication, logging, or IP blacklisting before they reach the routing table.
 
@@ -178,7 +178,7 @@ fn main() {
 }
 ```
 
-## 6-3. 📂 Static Folder
+## 6-3. Static Folder
 
 Serving static assets like **CSS**, **JavaScript**, and **images** is essential for web applications. `WebIo` provides a simple way to map a local directory to the server root, allowing files to be linked directly in HTML.
 
@@ -244,3 +244,5 @@ fn main() {
     app.run("127.0.0.1", "8080");
 }
 ```
+
+---

@@ -1,4 +1,4 @@
-# 5. 🔀 Dynamic Routing
+# 5. Dynamic Routing
 
 Path variables are captured using the `<key>` syntax. The **WebIO** engine automatically parses multiple parameters into a thread-safe collection for immediate use.
 
@@ -20,9 +20,11 @@ fn main() {
         
         Reply::new(StatusCode::Ok)
             .header("Content-Type", "text/html; charset=UTF-8")
-            .body(format!("<h1>🔀 ID: {}, KEY: {}</h1>", id, key))
+            .body(format!("<h1>ID: {}, KEY: {}</h1>", id, key))
     });
 
     app.run("127.0.0.1", "8080");
 }
 ```
+
+---

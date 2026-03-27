@@ -11,6 +11,8 @@
 #![doc = include_str!("../doc/08-application-tailoring.md")]
 #![doc = include_str!("../doc/09-application-settings.md")]
 #![doc = include_str!("../doc/10-extensions.md")]
+#![doc = include_str!("../doc/11-deployment.md")]
+#![doc = include_str!("../doc/12-license.md")]
 
 // Modules
 pub mod core;

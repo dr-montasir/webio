@@ -1,4 +1,4 @@
-# 7. 📡 Log Reply
+# 7. Log Reply
 
 **WebIO** allows for the monitoring of outgoing responses by enabling **Reply Logging**. When active, the engine tracks status codes and headers sent back to the client, providing better visibility into the server's final output.
 
@@ -27,3 +27,5 @@ fn main() {
     app.run("127.0.0.1", "8080");
 }
 ```
+
+---

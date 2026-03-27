@@ -6,7 +6,7 @@
   <br>
 </div>
 
-# WebIO 🦅
+# WebIO
 
 > **A minimalist, high-performance Rust web framework built with a zero-dependency philosophy for maximum speed and low memory footprint.**
 
@@ -16,16 +16,16 @@
 
 ---
 
-## 🦅 Why WebIO?
+## Why WebIO?
 
 WebIO is a zero-dependency Rust web framework engineered for high performance, from real-time chat to intensive data science. Powered strictly by the **Rust Standard Library**, the engine prevents "event loop freeze" by ensuring heavy calculations never compromise general service responsiveness.
 The minimalist architecture utilizes dedicated **OS threads** for pre-emptive multitasking. Featuring a "Safe-Turbo" executor with a custom spin-loop for ultra-low latency and O(1) memory complexity for big data, WebIO delivers a high-integrity implementation for high-stakes environments.
 
-### ⚠️ The "Event Loop Freeze" Problem
-In traditional async runtimes, tasks must "yield" voluntarily. If a single reques performs a heavy calculation—such as a regression model, image processing, or large CSV parse—the **entire event loop thread is blocked**, freezing the server for all other concurrent connections, including lightweight API calls or Chat sockets. 
+### Event Loop Blocking: Performance Bottlenecks
+In traditional async runtimes, tasks must yield control voluntarily. If a single request performs a heavy calculation—such as a regression model, image processing, or a large CSV parse—the **entire event loop thread is blocked**. This freezes the server for all other concurrent connections, including lightweight API calls or WebSocket tasks.
 
 
-### 💡 WebIO Solution: Go-Inspired OS Pre-emption
+### WebIO Solution: Go-Inspired OS Pre-emption
 
 WebIO utilizes raw OS Threads for true kernel-level isolation. Whether serving a lightweight API or a heavy-duty data model, the OS ensures every connection stays active.
 
@@ -33,20 +33,20 @@ WebIO utilizes raw OS Threads for true kernel-level isolation. Whether serving a
 - **Safe-Turbo Bridge:** A specialized **`block_on`** executor with a 150k-cycle spin-loop catches I/O states in nanoseconds, bypassing OS scheduler jitter for ultra-low latency.
 - **Zero-RAM Big Data**: Raw TcpStream access enables moving 100GB+ datasets in 64KB chunks, bypassing the 10MB RAM safety guard.
 
-## ✅ Production Ready: v1.0.0 Stable
+## Production Ready: v1.0.0 Stable
 **WebIO is now a Stable Production Engine, moving beyond its initial research and development phase.**
 - **API Stability:** Starting with **v1.0.0**, WebIO follows strict semantic versioning. The core architecture and concurrency patterns are now locked for long-term stability.
 - **Legacy Research:** Versions below **1.0.0** (0.9.x and earlier) represent the research phase and may contain breaking changes or unstable patterns.
 - **The Goal:** To provide a **high-integrity, zero-dependency core** for high-performance web projects.
 - **Framework Foundation:** Much like Tokio or Axum, WebIO is a powerful base for building specialized tools. It is designed to be the **core foundation** for the <a href="https://fluxor.one" target="_blank"><strong>Fluxor</strong></a> Data Science framework and any other project requiring WebIO’s unique multi-threaded performance. 
 
-## 🛠️ Performance Architecture
+## Performance Architecture
 * **Hybrid Spin-Wait Strategy:** The `block_on` executor uses a 150k-cycle spin-loop to catch I/O ready states in nanoseconds, maintaining sub-millisecond tail latency by bypassing OS scheduler jitter for "hot" tasks.
 * **Smart RAM Cache:** Transparently caches hot assets (<500KB) using an `RwLock` to provide **~50µs** RAM-speed delivery for CSS/JS/JSON, while large files stream safely from the Disk.
 * **Zero-Dependency Integrity:** By strictly avoiding external crates, WebIO is immune to "supply chain attacks" and remains a pure, high-performance core for Computing Science and Mathematical applications.
 * **Nagle Control:** Granular builder-pattern control over TCP throughput vs. latency (set_nagle) optimizes for either real-time APIs or massive data syncs.
 
-## 🎯 Core Philosophy
+## Core Philosophy
 WebIO provides a fully functional web engine with **zero external dependencies**. By strictly utilizing the Rust std library, it ensures an ultra-light footprint, rapid compilation, and total memory predictability.
 **zero external dependencies**. 
 - **No** `tokio`, `async-std` or `hyper`.
@@ -54,7 +54,7 @@ WebIO provides a fully functional web engine with **zero external dependencies**
 - **No** `unsafe`  code in the executor.
 - **Just pure, high-performance Rust**.
 
-## 🛠️ Installation
+## Installation
 
 To include **webio** in your Rust project, run:
 
@@ -69,7 +69,7 @@ Or add **webio** to your `Cargo.toml`:
 webio = "MAJOR.MINOR.PATCH" # replace with the actual version
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 1. **Closure Pattern**
 
@@ -107,7 +107,7 @@ fn main() {
 }
 ```
 
-## 📋 Example 
+## Example 
 
 The following example demonstrates a production-style implementation, utilizing dynamic routing, raw stream handling for massive datasets, and high-speed disk allocation.
 
@@ -181,7 +181,7 @@ fn main() {
 }
 ```
 
-### ⚡ Performance Snapshots
+### Performance Snapshots
 
 WebIO bypasses traditional abstraction layers to achieve raw hardware speeds. The following metrics were captured during 100MB and 1GB disk allocation operations:
 
@@ -223,7 +223,7 @@ This chart visually confirms the **Perfect Linear Scaling** of the WebIO engine.
   <img src="https://github.com/dr-montasir/webio/raw/HEAD/performance.svg" width="100%">
 </div>
 
-### 📊 WebIO Performance Scaling Summary
+### WebIO Performance Scaling Summary
 
 | Data Volume        | Time (ms)    | Throughput      | Engine Status           |
 | :----------------- | :----------- | :-------------- | :---------------------- |

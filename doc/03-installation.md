@@ -1,4 +1,4 @@
-# 3. 🛠️ Installation
+# 3. Installation
 
 Include **webio** in the project:
 
@@ -12,3 +12,5 @@ Or add **webio** to the `Cargo.toml`:
 [dependencies]
 webio = "MAJOR.MINOR.PATCH" # replace with the actual version
 ```
+
+---

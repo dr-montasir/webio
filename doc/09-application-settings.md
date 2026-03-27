@@ -1,8 +1,8 @@
-# 9. ⚙️ Application Settings
+# 9. Application Settings
 
 WebIO provides **low-level control** over the underlying TCP stack and memory management. These settings optimize the engine for different workloads, ranging from `real-time messaging` to `massive data ingestion`.
 
-## 9-1. 📈 Dynamic Nagle Control
+## 9-1. Dynamic Nagle Control
 
 Access to the **Nagle Algorithm** (`TCP_NODELAY`) allows for tuning networking behavior. This configuration is applied within the **Worker Implementation** during the initial connection phase.
 
@@ -39,7 +39,7 @@ fn main() {
 }
 ```
 
-## 9-2. 🛡️ RAM Safety Guards
+## 9-2. RAM Safety Guards
 
 **(Pre-emptive Heap Protection)**
 
@@ -82,7 +82,7 @@ fn main() {
 - **Pre-emptive Rejection:** The connection is evaluated **before** the application attempts to buffer the body, stopping DoS attacks at the header level.
 - **Zero-Waste Policy:** If `content_length` exceeds `max_body_size`, the engine returns a 403 Forbidden immediately, preserving CPU and RAM for other concurrent threads.
 
-## 9-3. 🧵 Thread Isolation Security
+## 9-3. Thread Isolation Security
 
 WebIO ensures that global settings and high-load tasks never compromise the stability of the entire engine. By moving every connection into a **Dedicated OS Thread**, the framework achieves a level of security and reliability where heavy tasks cannot interfere with lightweight ones.
 
@@ -113,7 +113,7 @@ let reply = block_on(handler(req, params))
 # 5. Immediate resource reclamation upon completion
 ```
 
-## 9-4. 📡 Streaming Finalization
+## 9-4. Streaming Finalization
 
 **(Chunked Transfer & Syscall Optimization)**
 
@@ -153,3 +153,5 @@ Use code with caution.
 **Diagnostic & Telemetry**
 
 Upon the final byte flush, the thread triggers high-resolution telemetry logging. This captures the precise duration from the initial `TcpStream` acceptance to the final socket shutdown, providing developers with clear insight into **Request Latency**.
+
+---
