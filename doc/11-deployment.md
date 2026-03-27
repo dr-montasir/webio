@@ -43,7 +43,7 @@ fn main() {
 }
 ```
 
-## 11-3. Environment Variables (.env)
+## 11-3. Environment Variables
 
 If the project relies on external configurations (API keys, database URLs, or the `APP_UA` identity mentioned in the **Crator** logic), environment variables must be handled according to the deployment type:
 
