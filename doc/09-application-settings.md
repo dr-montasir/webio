@@ -154,4 +154,46 @@ Use code with caution.
 
 Upon the final byte flush, the thread triggers high-resolution telemetry logging. This captures the precise duration from the initial `TcpStream` acceptance to the final socket shutdown, providing developers with clear insight into **Request Latency**.
 
+## 9-5. MIME Type Configuration
+
+**WebIO** includes a built-in registry to map file extensions to their corresponding Media Types. For granular application control, the engine provides methods to add, update, or restrict specific formats. Further implementation details are available in the mime and engine source modules.
+
+**Customizing the Registry**
+
+The registry is modified directly through the `WebIo` instance before calling `.run()`. This allows for the support of modern formats or the disabling of sensitive file types.
+
+- **Set Single Type:** Add or update a specific mapping.
+- **Bulk Update:** Apply multiple mappings simultaneously using a vector of tuples.
+- **Remove Types:** Disable specific extensions to prevent the server from identifying or serving them with specific headers.
+
+```rust,no_run
+use webio::*;
+
+fn main() {
+    let mut app = WebIo::new();
+
+    // 1. Add support for modern image formats
+    app.set_mime("webp", "image/webp");
+
+    // 2. Bulk update for web assets and fonts
+    app.set_mimes(vec![
+        ("woff2", "font/woff2"), 
+        ("wasm", "application/wasm")
+    ]);
+
+    // 3. Security: Disable serving of specific script files
+    app.remove_mime("php");
+
+    // 4. Disable multiple video formats at once
+    let to_remove = vec!["mp4", "webm", "avi", "mov"];
+    app.remove_mimes(to_remove);
+
+    app.run("127.0.0.1", "8080");
+}
+```
+
+**Internal Resolution & Fallback**
+
+The engine performs case-insensitive lookups during the request cycle. If a file extension (e.g., `.JPG` or `.jpg`) is not found in the custom or default registry, **WebIO** defaults to **`application/octet-stream`** to ensure a safe binary fallback.  For more detailed implementation logic, check the [**`mime`**](https://docs.rs/crate/webio/latest/source/src/mime/mod.rs) and [**`engine`**](https://docs.rs/crate/webio/latest/source/src/engine/mod.rs) modules.
+
 ---
